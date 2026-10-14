@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICT TAFE Course Pathway Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#002664; --blue:#146CFD; --sky:#CBEDFD; --sky2:#8CE0FF;
+    --text:#22272B; --dim:#495054; --line:#CDD3D6; --bg:#F3F6FA; --red:#D7153A;
+    --display:'Public Sans', Arial, sans-serif; --body:'Public Sans', Arial, sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--text); font-family:var(--body); min-height:100vh; padding:20px 16px 60px;}
+  .wrap{max-width:720px; margin:0 auto;}
+  .top{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; gap:10px; background:var(--navy); color:#fff; padding:14px 20px; border-radius:10px;}
+  .brand{font-family:var(--display); font-weight:700; letter-spacing:.3px; font-size:1.05rem;}
+  .brand span{color:var(--sky2);}
+  .bar{height:6px; background:#D9E2EE; border-radius:4px; overflow:hidden; margin-bottom:20px;}
+  .bar div{height:100%; width:0; background:var(--blue); transition:width .3s;}
+  .panel{background:#fff; border:1px solid var(--line); border-radius:10px; padding:24px; margin-bottom:16px; box-shadow:0 1px 3px rgba(0,38,100,.06);}
+  .eyebrow{font-size:.74rem; letter-spacing:1.5px; color:var(--blue); text-transform:uppercase; margin-bottom:8px; font-weight:700;}
+  h1{font-family:var(--display); font-size:1.6rem; line-height:1.25; margin-bottom:12px; color:var(--navy);}
+  h2{font-family:var(--display); font-size:1.25rem; line-height:1.3; margin-bottom:16px; color:var(--navy);}
+  h3{font-family:var(--display); font-size:.95rem; color:var(--navy); margin-bottom:10px; letter-spacing:.6px; padding-bottom:8px; border-bottom:3px solid var(--sky);}
+  p{color:var(--dim); line-height:1.6; margin-bottom:12px; font-size:.97rem;}
+  .opts{display:flex; flex-direction:column; gap:10px; margin-bottom:18px;}
+  .opt{background:#fff; border:1px solid var(--line); border-radius:8px; padding:14px 16px; cursor:pointer; font-size:.95rem; text-align:left; color:var(--text); font-family:var(--body); transition:border-color .15s, background .15s;}
+  .opt:hover{border-color:var(--blue); background:#F7FBFF;}
+  .opt.sel{border:2px solid var(--blue); background:var(--sky); color:var(--navy); font-weight:600; padding:13px 15px;}
+  textarea{width:100%; min-height:90px; background:#fff; border:1px solid var(--line); border-radius:8px; color:var(--text); padding:12px; font-family:var(--body); font-size:.95rem; margin-bottom:16px; resize:vertical;}
+  textarea:focus{outline:2px solid var(--blue); border-color:var(--blue);}
+  .row{display:flex; gap:10px; flex-wrap:wrap;}
+  .btn{font-family:var(--display); font-weight:600; background:var(--navy); color:#fff; border:2px solid var(--navy); padding:11px 24px; border-radius:6px; cursor:pointer; font-size:.95rem;}
+  .btn:hover{background:var(--blue); border-color:var(--blue);}
+  .btn.ghost{background:#fff; color:var(--navy);}
+  .btn.ghost:hover{background:var(--sky);}
+  .btn:disabled{opacity:.35; cursor:not-allowed;}
+  .btn:focus-visible,.opt:focus-visible{outline:3px solid var(--blue); outline-offset:2px;}
+  .ladder{list-style:none;}
+  .ladder li{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid #E6EAEE;}
+  .ladder li:last-child{border-bottom:none;}
+  .lvl{flex-shrink:0; width:34px; height:34px; border-radius:50%; background:var(--navy); color:#fff; font-weight:700; font-size:.78rem; display:flex; align-items:center; justify-content:center; font-family:var(--display);}
+  .ladder b{display:block; color:var(--navy); font-size:.95rem;}
+  .ladder small{color:var(--dim); font-size:.84rem; line-height:1.5;}
+  ul.plain{margin-left:18px; color:var(--dim); font-size:.93rem; line-height:1.8;}
+  .tag{display:inline-block; background:var(--sky); border:1px solid #9DD4F0; border-radius:20px; padding:5px 13px; font-size:.84rem; margin:0 6px 6px 0; color:var(--navy); font-weight:500;}
+  .alt{border-top:1px solid var(--line); padding-top:12px; margin-top:12px;}
+  .alt b{color:var(--navy);}
+  .note{font-size:.82rem; color:var(--dim); line-height:1.6;}
+  .hide{display:none;}
+  @media print{
+    body{background:#fff;} .top{background:#fff; color:#002664; border:1px solid #002664;} .panel{box-shadow:none;}
+    .top .brand span{color:#146CFD;} .bar,.row,.noprint{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">ICT<span>_</span>PATHWAY EXPLORER</div>
+  </div>
+  <div class="bar"><div id="prog"></div></div>
+
+  <div id="intro" class="panel">
+    <div class="eyebrow">TAFE NSW // ICT</div>
+    <h1>Find your ICT pathway</h1>
+    <p>Made for people finishing school. Answer a few quick questions about what you're into and how you like to learn. You'll get TAFE course ideas, the skills you'd pick up, and job roles you could head toward.</p>
+    <p>There's no login, nothing is saved, and it takes about 3 minutes.</p>
+    <button class="btn" onclick="start()">Start ▶</button>
+  </div>
+
+  <div id="quiz" class="panel hide">
+    <div class="eyebrow" id="qcount"></div>
+    <h2 id="qtext"></h2>
+    <div class="opts" id="qopts"></div>
+    <textarea id="qnote" class="hide" placeholder="Optional — e.g. hobbies, subjects you like, things you've built or fixed"></textarea>
+    <div class="row">
+      <button class="btn ghost" id="backBtn" onclick="back()">◀ Back</button>
+      <button class="btn" id="nextBtn" onclick="next()">Next ▶</button>
+    </div>
+  </div>
+
+  <div id="results" class="hide"></div>
+</div>
+
+<script>
+const Q = [
+  {id:'interest', q:'Which part of IT interests you most?', opts:[
+    ['programming','Programming and Software Development'],['networking','Networking and Infrastructure'],['cyber','Cyber Security'],
+    ['data','Data and Databases'],['web','Web Design and Development'],['game','Game Design and Development'],
+    ['support','IT Support and Help Desk'],['cloud','Cloud Computing'],['ai','AI and Machine Learning'],['unsure','Not sure yet']]},
+  {id:'skill', q:'What is your strongest skill right now?', opts:[
+    ['logic','Problem Solving and Logic'],['creative','Creativity and Design'],['people','Communication and Helping People'],
+    ['hands','Hands-on Fixing and Setting Things Up'],['patterns','Spotting Details and Patterns']]},
+  {id:'level', q:'How far do you want to study?', opts:[
+    ['cert','Certificate level (up to Certificate IV)'],['diploma','Up to a Diploma'],['unsure','Not sure — show me the whole pathway']]},
+  {id:'notes', q:'Anything else about you? (optional)', note:true},
+  {id:'routine', q:'What kind of routine suits you?', opts:[
+    ['structured','Mostly structure — a set timetable'],['flexible','Mostly flexibility — I work at my own pace'],['mix','A mix of some structure and some flexibility']]},
+  {id:'classroom', q:'Where do you like to learn?', opts:[
+    ['campus','I prefer learning face to face'],['online','I prefer learning online'],['either','I do not mind either option']]},
+  {id:'motivation', q:'How do you stay motivated?', opts:[
+    ['self','I stay motivated and on track by myself'],['support','I stay on track best with regular check-ins and support'],['group','I work best with deadlines and classmates around me']]},
+  {id:'travel', q:'How far can you travel to study?', opts:[
+    ['near','I need to study close to home'],['occasional','Travel is only okay occasionally'],['regular','I am happy to travel regularly'],['online','I can only study online']]},
+  {id:'exp', q:'Overall, how much IT experience do you have?', opts:[
+    ['none','None yet'],['some','Some — school classes or hobby projects'],['lots','Quite a bit — I have built or fixed real things']]},
+  {id:'expArea', q:()=>'How much experience do you have in '+TRACKS[ans.interest].name+'?', skipIf:()=>ans.interest==='unsure', opts:[
+    ['none','None yet'],['some','A little — school classes or hobby projects'],
+    ['confident','Confident — I have built or fixed real things in this area'],
+    ['studied','I have already studied it (for example a Certificate III or similar)']]}
+];
+const TRACKS = {
+  programming:{name:'Programming and Software Development', ladder:[
+      [3,'Certificate III in Information Technology (Programming and Web)','Learn core coding, web basics and IT support skills.'],
+      [4,'Certificate IV in Information Technology (Programming)','Builds programming, analysis and workplace cyber security skills.'],
+      [5,'Diploma of Information Technology (Advanced Programming)','Deeper programming and problem-solving.']],
+    skills:['Writing and testing code','Debugging and logical thinking','Basic databases and web technologies','Analysing a problem and planning a solution','Working with workplace cyber security basics'],
+    jobs:['Junior software developer','Application or web developer','Software tester','Database support officer','Programming trainee']},
+  networking:{name:'Networking and Infrastructure', ladder:[
+      [3,'Certificate III in Information Technology (Networking or General)','Basic networking, hardware and support.'],
+      [4,'Certificate IV in Information Technology (Networking)','Configuring and managing networks.'],
+      [5,'Diploma of Information Technology (Cyber Security and Cloud Architecture)','Cloud and security skills on top of networking.']],
+    skills:['Setting up and troubleshooting networks','IP addressing, routers and switches','Windows and Linux basics','Supporting servers and cloud services','Documenting and maintaining systems'],
+    jobs:['Network support technician','Systems administrator (junior)','Cloud support officer','ICT support technician','Network operations assistant']},
+  cyber:{name:'Cyber Security', ladder:[
+      [3,'Certificate III in Information Technology (cyber security focus where offered)','Some campuses offer a cyber security specialisation.'],
+      [4,'Certificate IV in Cyber Security','Usually expects Certificate III or higher in IT plus networking skills.'],
+      [5,'Diploma of Information Technology (Cyber Security and Cloud Architecture)','Advanced security and cloud skills.']],
+    skills:['Analysing cyber security data','Managing ICT networks, protocols and security systems','Running vulnerability and penetration testing exercises','Spotting threats like phishing and social engineering','Following security best practice at work'],
+    jobs:['Cyber security assistant','Cyber security technician','Assistant security support officer','Junior penetration tester (assistant)','Help desk technician']},
+  data:{name:'Data and Databases', ladder:[
+      [3,'Certificate III in Information Technology (General or Programming and Web)','Builds core IT, coding and database basics.'],
+      [4,'Certificate IV in Information Technology (General — AI/Data focus)','General stream with an AI and Data focus, building data and analysis skills.'],
+      [5,'Diploma of Information Technology (Advanced Programming)','Stronger technical skills. Diploma graduates may be able to get credit toward the TAFE NSW Bachelor of Information Technology (Data Engineering) — check with TAFE NSW.']],
+    skills:['Organising and cleaning data','Database basics and querying','Spotting patterns and trends','Presenting findings clearly','Handling data securely'],
+    jobs:['Junior data analyst','Database support officer','Reporting assistant','Data quality officer','Programming trainee'],
+    extra:'TAFE NSW also offers short digital courses in areas like data analysis. Check what is currently available.'},
+  web:{name:'Web Design and Development', ladder:[
+      [3,'Certificate III in Information Technology (Programming and Web)','Introduces website design and coding.'],
+      [4,'Certificate IV in Information Technology (Website Development)','Builds web design and programming skills.'],
+      [5,'Diploma of Information Technology (Web Development)','Advanced front-end and web development.']],
+    skills:['HTML, CSS and JavaScript','Designing for different screens and users','Building and testing websites','Working with clients\' needs','Basic accessibility and web security habits'],
+    jobs:['Web designer','Front-end developer','Website content officer','Junior UX/UI designer','Web support officer']},
+  game:{name:'Game Design and Development', ladder:[
+      [3,'Certificate III in Information Technology (game design focus where offered)','Some campuses offer a game design specialisation.'],
+      [4,'Certificate IV in Information Technology (Programming)','Programming is a key skill for game development.'],
+      [5,'Diploma of Information Technology (Advanced Programming)','Stronger programming for complex projects.']],
+    skills:['Game concepts and level design basics','Programming logic','Testing and fixing bugs','Working in a team on a project','Creating and presenting prototypes'],
+    jobs:['Game tester','Junior game programmer','Game design assistant','Software tester','Programming trainee']},
+  support:{name:'IT Support and Help Desk', ladder:[
+      [3,'Certificate III in Information Technology (General)','Help desk, ICT support and basic networking.'],
+      [4,'Certificate IV in Information Technology','Broader IT services skills.'],
+      [5,'Diploma of Information Technology (pick a specialty that suits you)','Choose cyber, networking or programming later.']],
+    skills:['Troubleshooting hardware and software','Helping users clearly and patiently','Basic networking and operating systems','Logging and solving tickets','Keeping data and devices secure'],
+    jobs:['Help desk officer','Service desk analyst','ICT support technician','Technical support specialist','Desktop support officer']},
+  cloud:{name:'Cloud Computing', ladder:[
+      [3,'Certificate III in Information Technology (Networking or General)','Basic networking and support skills that cloud work builds on.'],
+      [4,'Certificate IV in Information Technology (Networking)','Configuring and managing networks and systems.'],
+      [5,'Diploma of Information Technology (Cyber Security and Cloud Architecture)','Cloud and security skills at diploma level.']],
+    skills:['Understanding how cloud services work','Setting up and managing systems and networks','Supporting servers and online services','Keeping cloud systems secure','Troubleshooting and documenting'],
+    jobs:['Cloud support officer','Junior systems administrator','Network support technician','ICT support technician','Infrastructure support assistant'],
+    extra:'TAFE NSW also offers short digital courses such as Cloud Computing Foundations. Check what is currently available.'},
+  ai:{name:'AI and Machine Learning (with a Data focus)', ladder:[
+      [3,'Certificate III in Information Technology (Programming and Web)','Coding basics you need before AI and machine learning work.'],
+      [4,'Certificate IV in Information Technology (General — AI/Data focus)','AI and machine learning topics sit inside this general stream.'],
+      [5,'Diploma of Information Technology (Advanced Programming)','Advanced programming and problem-solving.']],
+    skills:['Programming logic','Working with data sets','Introductory machine learning concepts','Automating repetitive tasks','Using AI safely and responsibly'],
+    jobs:['Junior developer','Junior data analyst','Automation assistant','Software tester','Programming trainee'],
+    extra:'AI and machine learning sit inside the Certificate IV in Information Technology general stream with an AI/Data focus. Check which campuses offer it, and what short digital courses are currently available.'}
+};
+const SKILLMAP = {
+  logic:{programming:2,cyber:1,ai:1,data:1},
+  creative:{web:2,game:2},
+  people:{support:2},
+  hands:{networking:2,support:1,cloud:1},
+  patterns:{cyber:2,data:2,ai:1,programming:1}
+};
+
+let idx = 0, ans = {};
+
+function start(){
+  document.getElementById('intro').classList.add('hide');
+  document.getElementById('quiz').classList.remove('hide');
+  idx = 0; ans = {}; render();
+}
+function visible(i){ return !(Q[i].skipIf && Q[i].skipIf()); }
+function visibleList(){ return Q.map((_,i)=>i).filter(visible); }
+function render(){
+  const q = Q[idx];
+  const vis = visibleList();
+  document.getElementById('qcount').textContent = 'Question ' + (vis.indexOf(idx)+1) + ' of ' + vis.length;
+  document.getElementById('qtext').textContent = typeof q.q === 'function' ? q.q() : q.q;
+  document.getElementById('prog').style.width = (vis.indexOf(idx)/vis.length*100) + '%';
+  const box = document.getElementById('qopts'); box.innerHTML = '';
+  const ta = document.getElementById('qnote');
+  if(q.note){
+    ta.classList.remove('hide'); ta.value = ans.notes || '';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    ta.classList.add('hide');
+    q.opts.forEach(([v,t])=>{
+      const b = document.createElement('button');
+      b.className = 'opt' + (ans[q.id]===v ? ' sel' : '');
+      b.textContent = t;
+      b.onclick = ()=>{ ans[q.id]=v; render(); };
+      box.appendChild(b);
+    });
+    document.getElementById('nextBtn').disabled = !ans[q.id];
+  }
+  document.getElementById('backBtn').style.visibility = vis.indexOf(idx)===0 ? 'hidden' : 'visible';
+  document.getElementById('nextBtn').textContent = idx===vis[vis.length-1] ? 'See my results ▶' : 'Next ▶';
+}
+function next(){
+  if(Q[idx].note) ans.notes = document.getElementById('qnote').value.trim();
+  let j = idx+1;
+  while(j<Q.length && !visible(j)) j++;
+  if(j<Q.length){ idx=j; render(); } else { showResults(); }
+}
+function back(){
+  if(Q[idx].note) ans.notes = document.getElementById('qnote').value.trim();
+  let j = idx-1;
+  while(j>=0 && !visible(j)) j--;
+  if(j>=0){ idx=j; render(); }
+}
+
+function esc(s){ return s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function rank(){
+  const order = ['programming','networking','cyber','data','web','game','support','cloud','ai'];
+  const sc = {}; order.forEach(k=>sc[k]=0);
+  if(ans.interest && ans.interest!=='unsure') sc[ans.interest] += 5;
+  Object.entries(SKILLMAP[ans.skill]||{}).forEach(([k,v])=>sc[k]+=v);
+  return order.slice().sort((a,b)=> sc[b]-sc[a] || order.indexOf(a)-order.indexOf(b));
+}
+function startLevel(){
+  const gen = {none:3, some:3, lots:4}[ans.exp] || 3;
+  const area = {none:3, some:3, confident:4, studied:4}[ans.expArea] || 0;
+  const maxL = {cert:4, diploma:5, unsure:5}[ans.level] || 5;
+  return Math.min(Math.max(gen, area), maxL);
+}
+function ladderFor(key){
+  const maxL = {cert:4, diploma:5, unsure:5}[ans.level] || 5;
+  const startL = startLevel();
+  const steps = [];
+  TRACKS[key].ladder.forEach(s=>{ if(s[0]>=startL && s[0]<=maxL) steps.push(s); });
+  return steps;
+}
+const MODES = {
+  face:{name:'Face to face class', desc:'Classes on campus with a timetable, teachers and classmates in the room.'},
+  virtual:{name:'Virtual (off campus)', desc:'Live classes online from home or anywhere, with a teacher and a class but no travel.'},
+  self:{name:'Self-paced (Digital)', desc:'Study online at your own pace, with learning materials available when it suits you.'}
+};
+function studyModes(){
+  const s = {face:0, virtual:0, self:0};
+  const add = (m,n)=>{ s[m]+=n; };
+  if(ans.classroom==='campus') add('face',3);
+  if(ans.classroom==='online'){ add('virtual',2); add('self',2); }
+  if(ans.classroom==='either'){ add('face',1); add('virtual',1); add('self',1); }
+  if(ans.routine==='structured'){ add('face',2); add('virtual',1); }
+  if(ans.routine==='flexible'){ add('self',3); }
+  if(ans.routine==='mix'){ add('virtual',2); add('face',1); add('self',1); }
+  if(ans.motivation==='self') add('self',3);
+  if(ans.motivation==='support'){ add('face',1); add('virtual',2); }
+  if(ans.motivation==='group'){ add('face',2); add('virtual',1); }
+  if(ans.travel==='near'){ add('virtual',1); add('self',1); }
+  if(ans.travel==='occasional'){ add('virtual',1); add('self',1); }
+  if(ans.travel==='regular') add('face',1);
+  if(ans.travel==='online'){ s.face = -99; add('virtual',2); add('self',1); }
+  const order = ['face','virtual','self'];
+  const sorted = order.slice().sort((a,b)=> s[b]-s[a] || order.indexOf(a)-order.indexOf(b));
+  return sorted;
+}
+function learningStyle(){
+  const bits = [];
+  bits.push({structured:'You like a clear timetable, so scheduled classes with set deadlines will keep you on track.',
+             flexible:'You like to work at your own pace, so look for courses with flexible or self-paced delivery.',
+             mix:'You are happy with some structure and some flexibility, so a blended course could suit you.'}[ans.routine]);
+  bits.push({campus:'You prefer learning face to face, so check which campuses near you run the course.',
+             online:'You prefer online study, so check which courses can be done online — not all can.',
+             either:'You are happy with face to face or online, which gives you more courses and campuses to choose from.'}[ans.classroom]);
+  bits.push({self:'You stay on track by yourself, so self-paced and project-based units should suit you.',
+             support:'You do best with regular check-ins, so ask what teacher support and catch-ups are available.',
+             group:'You work best with deadlines and classmates around you, so on-campus classes and group projects will suit you.'}[ans.motivation]);
+  bits.push({near:'You need to study close to home, so check campus locations early — not every campus runs every specialisation.',
+             occasional:'Travel is only okay occasionally, so look for courses with mostly local or online delivery.',
+             regular:'You are happy to travel regularly, which gives you more campuses and specialisations to choose from.',
+             online:'You can only study online, so confirm the course has an online option before you plan around it.'}[ans.travel]);
+  return bits;
+}
+function showResults(){
+  document.getElementById('quiz').classList.add('hide');
+  document.getElementById('prog').style.width = '100%';
+  const r = rank(), main = r[0], alts = r.slice(1,3);
+  const T = TRACKS[main];
+  let h = '';
+  h += '<div class="panel"><div class="eyebrow">Your results</div><h1>Top pathway: '+T.name+'</h1>'+
+       '<p>Based on your answers, this looks like a strong fit. Here is a way you could work up through TAFE.</p>'+
+       (startLevel()>=4 ? '<p>Because of your experience, this starts at Certificate IV or above. Ask TAFE NSW about recognition of prior learning (RPL) and entry requirements, as your skills may count toward earlier courses.</p>' : '')+
+       (ans.notes ? '<p><b style="color:var(--text)">Your notes:</b> '+esc(ans.notes)+'</p>' : '')+'</div>';
+  h += '<div class="panel"><h3>RECOMMENDED TAFE COURSES</h3><ul class="ladder">';
+  ladderFor(main).forEach(s=>{
+    const lv = s[0]===2?'II':s[0]===3?'III':s[0]===4?'IV':'Dip';
+    h += '<li><div class="lvl">'+lv+'</div><div><b>'+s[1]+'</b><small>'+s[2]+'</small></div></li>';
+  });
+  h += '</ul>';
+  if(T.extra) h += '<p class="note" style="margin-top:10px">'+T.extra+'</p>';
+  alts.forEach(k=>{
+    const first = ladderFor(k)[0];
+    h += '<div class="alt"><b>Also worth a look: '+TRACKS[k].name+'</b><p style="margin:4px 0 0">Starting point: '+first[1]+'</p></div>';
+  });
+  h += '</div>';
+  h += '<div class="panel"><h3>SKILLS YOU WILL GAIN</h3><ul class="plain">'+T.skills.map(s=>'<li>'+s+'</li>').join('')+'</ul></div>';
+  h += '<div class="panel"><h3>POTENTIAL JOB ROLES</h3>'+T.jobs.map(j=>'<span class="tag">'+j+'</span>').join('')+
+       '<p class="note" style="margin-top:8px">These are example entry-level roles. Where you end up depends on your study, experience and the local job market.</p></div>';
+  const modes = studyModes(), best = MODES[modes[0]], alt = MODES[modes[1]];
+  h += '<div class="panel"><h3>HOW YOU COULD STUDY</h3>'+
+       '<p style="margin-bottom:4px"><b style="color:var(--text)">Best fit: '+best.name+'</b></p><p>'+best.desc+'</p>'+
+       '<p style="margin-bottom:4px"><b style="color:var(--text)">Also consider: '+alt.name+'</b></p><p>'+alt.desc+'</p>'+
+       '<ul class="plain">'+learningStyle().map(s=>'<li>'+s+'</li>').join('')+'</ul>'+
+       '<p class="note" style="margin-top:10px">Which study modes are available depends on the course and campus, so check the TAFE NSW course page.</p></div>';
+  h += '<div class="panel"><h3>NEXT STEPS</h3><ul class="plain">'+
+       '<li>Talk to a careers advisor about TAFE options and how to apply.</li>'+
+       '<li>Look up each course on the TAFE NSW website to check entry requirements, campuses and start dates.</li>'+
+       '<li>If you\'re under 18, TAFE may ask for extra information when you enrol, so ask early.</li></ul>'+
+       '<p class="note" style="margin-top:12px">This is a general guide based on common TAFE NSW IT courses, not an enrolment tool. Course names, specialisations and entry requirements vary by campus and change over time. It doesn\'t use AI, and your answers aren\'t saved or sent anywhere.</p></div>';
+  h += '<div class="row noprint"><button class="btn" onclick="window.print()">Print my results</button><button class="btn ghost" onclick="location.reload()">Start again</button></div>';
+  const el = document.getElementById('results');
+  el.innerHTML = h; el.classList.remove('hide');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+</script>
+</body>
+</html>
