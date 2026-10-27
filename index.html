@@ -49,6 +49,7 @@
   .alt{border-top:1px solid var(--line); padding-top:12px; margin-top:12px;}
   .alt b{color:var(--navy);}
   .note{font-size:.82rem; color:var(--dim); line-height:1.6;}
+  .pick{font-size:.85rem; font-weight:600; color:var(--blue); margin-bottom:14px;}
   .hide{display:none;}
   @media print{
     body{background:#fff;} .top{background:#fff; color:#002664; border:1px solid #002664;} .panel{box-shadow:none;}
@@ -73,7 +74,8 @@
 
   <div id="quiz" class="panel hide">
     <div class="eyebrow" id="qcount"></div>
-    <h2 id="qtext"></h2>
+    <h2 id="qtext" style="margin-bottom:6px"></h2>
+    <p class="pick" id="qhint"></p>
     <div class="opts" id="qopts"></div>
     <textarea id="qnote" class="hide" placeholder="Optional — e.g. hobbies, subjects you like, things you've built or fixed"></textarea>
     <div class="row">
@@ -93,7 +95,7 @@ const Q = [
     ['support','IT Support and Help Desk'],['cloud','Cloud Computing'],['ai','AI and Machine Learning'],['unsure','Not sure yet']]},
   {id:'skill', q:'What is your strongest skill right now?', opts:[
     ['logic','Problem Solving and Logic'],['creative','Creativity and Design'],['people','Communication and Helping People'],
-    ['hands','Hands-on Fixing and Setting Things Up'],['patterns','Spotting Details and Patterns']]},
+    ['hands','Hands-on Fixing and Setting Things Up'],['patterns','Spotting Details and Patterns'],['none','None of the above']]},
   {id:'level', q:'How far do you want to study?', opts:[
     ['cert','Certificate level (up to Certificate IV)'],['diploma','Up to a Diploma'],['unsure','Not sure — show me the whole pathway']]},
   {id:'notes', q:'Anything else about you? (optional)', note:true},
@@ -105,6 +107,10 @@ const Q = [
     ['self','I stay motivated and on track by myself'],['support','I stay on track best with regular check-ins and support'],['group','I work best with deadlines and classmates around me']]},
   {id:'travel', q:'How far can you travel to study?', opts:[
     ['near','I need to study close to home'],['occasional','Travel is only okay occasionally'],['regular','I am happy to travel regularly'],['online','I can only study online']]},
+  {id:'availability', q:'Can you attend scheduled classes?', opts:[
+    ['yes','Yes — I can attend classes at set times'],
+    ['some','Mostly — but I have some other commitments'],
+    ['limited','No — I will be working or have other commitments, so I need to fit study around them']]},
   {id:'exp', q:'Overall, how much IT experience do you have?', opts:[
     ['none','None yet'],['some','Some — school classes or hobby projects'],['lots','Quite a bit — I have built or fixed real things']]},
   {id:'expArea', q:()=>'How much experience do you have in '+TRACKS[ans.interest].name+'?', skipIf:()=>ans.interest==='unsure', opts:[
@@ -193,6 +199,7 @@ function render(){
   const vis = visibleList();
   document.getElementById('qcount').textContent = 'Question ' + (vis.indexOf(idx)+1) + ' of ' + vis.length;
   document.getElementById('qtext').textContent = typeof q.q === 'function' ? q.q() : q.q;
+  document.getElementById('qhint').textContent = q.note ? 'Optional — you can leave this blank.' : 'Choose one answer only.';
   document.getElementById('prog').style.width = (vis.indexOf(idx)/vis.length*100) + '%';
   const box = document.getElementById('qopts'); box.innerHTML = '';
   const ta = document.getElementById('qnote');
@@ -251,37 +258,38 @@ function ladderFor(key){
 const MODES = {
   face:{name:'Face to face class', desc:'Classes on campus with a timetable, teachers and classmates in the room.'},
   virtual:{name:'Virtual (off campus)', desc:'Live classes online from home or anywhere, with a teacher and a class but no travel.'},
-  self:{name:'Self-paced (Digital)', desc:'Study online at your own pace, with learning materials available when it suits you.'}
+  self:{name:'Self-paced (Digital)', desc:'Study online at your own pace with no set class times. Best if you cannot attend classes because of work or other commitments.'}
 };
 function studyModes(){
-  const s = {face:0, virtual:0, self:0};
-  const add = (m,n)=>{ s[m]+=n; };
-  if(ans.classroom==='campus') add('face',3);
-  if(ans.classroom==='online'){ add('virtual',2); add('self',2); }
-  if(ans.classroom==='either'){ add('face',1); add('virtual',1); add('self',1); }
-  if(ans.routine==='structured'){ add('face',2); add('virtual',1); }
-  if(ans.routine==='flexible'){ add('self',3); }
-  if(ans.routine==='mix'){ add('virtual',2); add('face',1); add('self',1); }
-  if(ans.motivation==='self') add('self',3);
-  if(ans.motivation==='support'){ add('face',1); add('virtual',2); }
-  if(ans.motivation==='group'){ add('face',2); add('virtual',1); }
-  if(ans.travel==='near'){ add('virtual',1); add('self',1); }
-  if(ans.travel==='occasional'){ add('virtual',1); add('self',1); }
-  if(ans.travel==='regular') add('face',1);
-  if(ans.travel==='online'){ s.face = -99; add('virtual',2); add('self',1); }
-  const order = ['face','virtual','self'];
-  const sorted = order.slice().sort((a,b)=> s[b]-s[a] || order.indexOf(a)-order.indexOf(b));
-  return sorted;
+  const s = {face:0, virtual:0};
+  if(ans.classroom==='campus') s.face+=3;
+  if(ans.classroom==='online') s.virtual+=3;
+  if(ans.classroom==='either'){ s.face+=1; s.virtual+=1; }
+  if(ans.routine==='structured'){ s.face+=2; s.virtual+=1; }
+  if(ans.routine==='flexible') s.virtual+=2;
+  if(ans.routine==='mix'){ s.face+=1; s.virtual+=1; }
+  if(ans.motivation==='self') s.virtual+=1;
+  if(ans.motivation==='support'){ s.face+=1; s.virtual+=2; }
+  if(ans.motivation==='group'){ s.face+=2; s.virtual+=1; }
+  if(ans.travel==='near' || ans.travel==='occasional') s.virtual+=1;
+  if(ans.travel==='regular') s.face+=1;
+  if(ans.travel==='online'){ s.face=-99; s.virtual+=2; }
+  const fv = ['face','virtual'].sort((x,y)=> s[y]-s[x]);
+  // Self-paced (Digital) is only the top pick when the student cannot attend scheduled classes
+  if(ans.availability==='limited') return ['self', fv[0]];
+  // online-only students can't be offered face to face, so their second option is self-paced
+  if(ans.travel==='online') return ['virtual','self'];
+  return fv;
 }
 function learningStyle(){
   const bits = [];
   bits.push({structured:'You like a clear timetable, so scheduled classes with set deadlines will keep you on track.',
-             flexible:'You like to work at your own pace, so look for courses with flexible or self-paced delivery.',
+             flexible:'You like working at your own pace, so ask what flexibility and catch-up support a course offers.',
              mix:'You are happy with some structure and some flexibility, so a blended course could suit you.'}[ans.routine]);
   bits.push({campus:'You prefer learning face to face, so check which campuses near you run the course.',
              online:'You prefer online study, so check which courses can be done online — not all can.',
              either:'You are happy with face to face or online, which gives you more courses and campuses to choose from.'}[ans.classroom]);
-  bits.push({self:'You stay on track by yourself, so self-paced and project-based units should suit you.',
+  bits.push({self:'You stay on track by yourself, so project-based units and independent work should suit you.',
              support:'You do best with regular check-ins, so ask what teacher support and catch-ups are available.',
              group:'You work best with deadlines and classmates around you, so on-campus classes and group projects will suit you.'}[ans.motivation]);
   bits.push({near:'You need to study close to home, so check campus locations early — not every campus runs every specialisation.',
@@ -319,6 +327,7 @@ function showResults(){
   h += '<div class="panel"><h3>HOW YOU COULD STUDY</h3>'+
        '<p style="margin-bottom:4px"><b style="color:var(--text)">Best fit: '+best.name+'</b></p><p>'+best.desc+'</p>'+
        '<p style="margin-bottom:4px"><b style="color:var(--text)">Also consider: '+alt.name+'</b></p><p>'+alt.desc+'</p>'+
+       (modes[0]==='self' ? '<p class="note">Self-paced is suggested because you said you will need to fit study around work or other commitments.</p>' : '')+
        '<ul class="plain">'+learningStyle().map(s=>'<li>'+s+'</li>').join('')+'</ul>'+
        '<p class="note" style="margin-top:10px">Which study modes are available depends on the course and campus, so check the TAFE NSW course page.</p></div>';
   h += '<div class="panel"><h3>NEXT STEPS</h3><ul class="plain">'+
