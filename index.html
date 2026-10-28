@@ -41,7 +41,7 @@
   .ladder{list-style:none;}
   .ladder li{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid #E6EAEE;}
   .ladder li:last-child{border-bottom:none;}
-  .lvl{flex-shrink:0; width:34px; height:34px; border-radius:50%; background:var(--navy); color:#fff; font-weight:700; font-size:.78rem; display:flex; align-items:center; justify-content:center; font-family:var(--display);}
+  .lvl{flex-shrink:0; min-width:46px; height:34px; padding:0 8px; border-radius:17px; background:var(--navy); color:#fff; font-weight:700; font-size:.78rem; display:flex; align-items:center; justify-content:center; font-family:var(--display);}
   .ladder b{display:block; color:var(--navy); font-size:.95rem;}
   .ladder small{color:var(--dim); font-size:.84rem; line-height:1.5;}
   ul.plain{margin-left:18px; color:var(--dim); font-size:.93rem; line-height:1.8;}
@@ -50,6 +50,7 @@
   .alt b{color:var(--navy);}
   .note{font-size:.82rem; color:var(--dim); line-height:1.6;}
   .pick{font-size:.85rem; font-weight:600; color:var(--blue); margin-bottom:14px;}
+  .callout{background:var(--sky); border-left:4px solid var(--blue); border-radius:6px; padding:12px 14px; margin:14px 0; color:var(--navy); font-size:.92rem; line-height:1.55; font-weight:500;}
   .hide{display:none;}
   @media print{
     body{background:#fff;} .top{background:#fff; color:#002664; border:1px solid #002664;} .panel{box-shadow:none;}
@@ -310,7 +311,7 @@ function showResults(){
        (ans.notes ? '<p><b style="color:var(--text)">Your notes:</b> '+esc(ans.notes)+'</p>' : '')+'</div>';
   h += '<div class="panel"><h3>RECOMMENDED TAFE COURSES</h3><ul class="ladder">';
   ladderFor(main).forEach(s=>{
-    const lv = s[0]===2?'II':s[0]===3?'III':s[0]===4?'IV':'Dip';
+    const lv = s[0]===2?'CII':s[0]===3?'CIII':s[0]===4?'CIV':'Dip';
     h += '<li><div class="lvl">'+lv+'</div><div><b>'+s[1]+'</b><small>'+s[2]+'</small></div></li>';
   });
   h += '</ul>';
@@ -327,7 +328,8 @@ function showResults(){
   h += '<div class="panel"><h3>HOW YOU COULD STUDY</h3>'+
        '<p style="margin-bottom:4px"><b style="color:var(--text)">Best fit: '+best.name+'</b></p><p>'+best.desc+'</p>'+
        '<p style="margin-bottom:4px"><b style="color:var(--text)">Also consider: '+alt.name+'</b></p><p>'+alt.desc+'</p>'+
-       (modes[0]==='self' ? '<p class="note">Self-paced is suggested because you said you will need to fit study around work or other commitments.</p>' : '')+
+       '<p class="callout">We find better completion rates for students who attend classes face to face or virtually, so we recommend one of these two options wherever you can.</p>'+
+       (modes[0]==='self' ? '<p class="note">Self-paced is suggested because you said you will need to fit study around work or other commitments. If you can, ask about joining some live or virtual sessions, as attendance helps students finish.</p>' : '')+
        '<ul class="plain">'+learningStyle().map(s=>'<li>'+s+'</li>').join('')+'</ul>'+
        '<p class="note" style="margin-top:10px">Which study modes are available depends on the course and campus, so check the TAFE NSW course page.</p></div>';
   h += '<div class="panel"><h3>NEXT STEPS</h3><ul class="plain">'+
